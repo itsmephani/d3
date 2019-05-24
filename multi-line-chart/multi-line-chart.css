@@ -1,0 +1,19 @@
+.multi-line-chart__tooltip {
+  position: absolute;
+  background: whitesmoke;
+  box-shadow: 1px 2px 3px 0px rgba(0, 0, 0, 0.22);
+  border-radius: 4px;
+  min-width: 80px;
+  padding: 4px 8px;
+  transition: opacity 0.1s;
+  opacity: 0;
+}
+
+.point {
+  transition: fill 0.05s;
+}
+
+.axis-title,
+.legend-text {
+  font-size: 10px;
+}
