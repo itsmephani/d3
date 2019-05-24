@@ -94,7 +94,7 @@ class MultiLineChart {
   drawGrid() {
     const x2 = this.width - this.config.margin.left - this.config.margin.right;
     const y2 = this.height - this.config.margin.top - this.config.margin.bottom;
-    const xAxisData = this.xScale.ticks ? this.xScale.ticks : this.xAxisData;
+    const xAxisData = this.xScale.ticks ? this.xScale.ticks() : this.xAxisData;
     const yAxisData = this.yScale.ticks ? this.yScale.ticks() : this.yAxisData;
 
     this.svg.selectAll('grid-x-line')
