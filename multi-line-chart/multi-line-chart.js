@@ -2,6 +2,18 @@
 const scalePoint = 'scalePoint';
 
 const COLORS = d3.scaleOrdinal(d3.schemeCategory10);
+const X = 0;
+const Y1 = 1;
+const Y2 = 2;
+const TOP_LEFT = 0;
+const BOTTOM_RIGHT = 1;
+
+const rectContains = (rect, point) => {
+  console.log(rect, point);
+  return rect[TOP_LEFT][X] <= point[X] && point[X] <= rect[BOTTOM_RIGHT][X]
+         && (rect[TOP_LEFT][Y1] <= point[Y1] && point[Y1] <= rect[BOTTOM_RIGHT][Y1]
+         ||  rect[TOP_LEFT][Y1] <= point[Y2] && point[Y2] <= rect[BOTTOM_RIGHT][Y1]);
+};
 
 class MultiLineChart {
  
@@ -14,18 +26,24 @@ class MultiLineChart {
     this.yScale = null;
     this.xAxisData = [];
     this.yAxisData = [];
+    this.previousData = [];
 
     this.width = this.config.width || 500;
     this.height = this.config.height || 400;
 
-    this.drawChart();
+    this.brush = {};
+
+    setTimeout( _ => { 
+      this.drawChart();
+    }, 0);
   }
 
   drawChart() {
     this.initSvg();
-    this.initAxis();
+    this.initAxis();       
     this.drawAxis();
     this.drawGrid();
+    this.drawBrush();
     this.drawMultiLineChart();
     this.drawLegend();
   }
@@ -39,7 +57,7 @@ class MultiLineChart {
   initSvg() {
     const tooltipElement = document.createElement('div');
     tooltipElement.setAttribute('class', 'multi-line-chart__tooltip');
-    document.body.insertBefore(tooltipElement, null);
+    document.querySelector('body').insertBefore(tooltipElement, null);
     this.tooltipContainer = d3.select(tooltipElement);
 
     this.svg = d3.select(this.config.element)
@@ -47,7 +65,6 @@ class MultiLineChart {
         .attr('height', this.height)
         .append('g')
         .attr('transform', 'translate(' + this.config.margin.left + ',' + this.config.margin.top + ')');
-
   }
 
   initAxis() {
@@ -72,6 +89,21 @@ class MultiLineChart {
       this.yScale = d3[this.config.yScale]().range([this.height - this.config.margin.top - this.config.margin.bottom, 0]);
       this.yScale.domain(d3.extent(this.yAxisData.sort((a, b) => a - b)));
     }
+  }
+
+  brushended() {
+    const { selection } = d3.event;
+    if (!selection) { return; }
+    const brushedNodes = this.config.data.filter(d => {
+      return rectContains(selection, [this.xScale(d[0][this.config.xProp]), this.yScale(d[0][this.config.yProps[0]]), this.yScale(d[1][this.config.yProps[1]])])
+    });
+
+    console.log(brushedNodes);
+    if (!brushedNodes.length) { return; }
+    this.previousData = [...this.config.data];
+    this.config.data = brushedNodes;
+    this.clearChart();
+    this.drawChart();
   }
 
   drawAxis() {
@@ -202,5 +234,23 @@ class MultiLineChart {
         .attr('x', (d, i) => (i * 50) + 5)
         .attr('y', yPosition + 4)
         .text((d, i) => this.config.yProps[i]);
+  }
+
+  resetChart() {
+    this.config.data = [...this.previousData];
+    this.previousData = [];
+
+    this.clearChart();
+    this.drawChart();
+  }
+
+  drawBrush() {
+    this.brush = d3.brush()
+      .extent([[0, 0], [this.width - this.config.margin.right - this.config.margin.left, this.height - this.config.margin.top - this.config.margin.bottom]])
+      .on("end", this.brushended.bind(this));
+      
+    this.svg.append('g')
+      .attr("class", "brush")
+      .call(this.brush);
   }
 }
