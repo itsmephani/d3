@@ -35,6 +35,8 @@ class MultiLineChart {
 
     setTimeout( _ => { 
       this.drawChart();
+      document.querySelector('#resetGraph')
+          .addEventListener('click', this.resetChart.bind(this));
     }, 0);
   }
 
@@ -237,6 +239,8 @@ class MultiLineChart {
   }
 
   resetChart() {
+    if (!this.previousData.length) { return; }
+
     this.config.data = [...this.previousData];
     this.previousData = [];
 
