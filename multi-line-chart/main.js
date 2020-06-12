@@ -6,7 +6,7 @@
       `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, 0)}-01`;
   
   const fetchPrices = (currencyCode) => {
-    const url = `https://financialmodelingprep.com/api/v3/historical-price-full/${currencyCode}?from=${todayFormatted}`;
+    const url = `https://financialmodelingprep.com/api/v3/historical-price-full/${currencyCode}?from=${todayFormatted}&apikey=6243fac87451ba24ec45a5f37563d6f0`;
 
     return fetch(url).then(res => res.json());
   };
